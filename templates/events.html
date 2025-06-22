@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+ 
+	<!-- Boxicons -->
+	<link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+	<link rel="stylesheet" href="{{ url_for('static', filename='style_ev.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='evo-calendar.min.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='evo-calendar.midnight-blue.min.css') }}">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+	<title>Sahayak-eventscheduler</title>
+</head>
+
+<body>
+
+	<div class="cal">
+		<div id="calendar"></div>
+	</div>
+
+	<!-- Add Event Button -->
+	<button class="add-event-btn">+</button>
+
+	 <!-- Popup Modal -->
+	 <div class="popup-overlay"></div>
+	 <div class="popup">
+		<span class="close-btn">&times;</span> <!-- Close Button -->
+		 <h2>Add Event</h2>
+		 <input type="text" id="event-name" placeholder="Event Name" required>
+		 <label>Start time:</label>
+		 <input type="time" id="start-time" placeholder="Start time" required>
+		 <label>End time:</label>
+		 <input type="time" id="end-time" placeholder="End time" required>
+		 <div style="margin-bottom: 10px;">
+			<label>Every Year:</label>
+			<input type="radio" id="everyYearYes" name="everyYear" value="true"> <label for="everyYearYes">Yes</label>
+			<input type="radio" id="everyYearNo" name="everyYear" value="false"> <label for="everyYearNo">No</label>
+		</div>
+		 <textarea id="event-description" placeholder="Event Description"></textarea>
+
+		 <div style="margin-bottom: 10px;">
+			<label for="event-color">Event Color:</label>
+			<input type="color" id="event-color" value="#ffc107"> <!-- Default color set to yellow -->
+		</div>
+
+		 <button id="add-event">Add Event</button>
+	 </div>
+
+	<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+
+	<script src="{{ url_for('static', filename='evo-calendar.min.js') }}"></script>
+
+	<script>
+		$(document).ready(async function () {
+			let selectedDate = new Date().toLocaleDateString('en-US', {
+				year: 'numeric',
+				month: '2-digit',
+				day: '2-digit'
+			}).replace(/\//g, '/'); // Format: MM/DD/YYYY
+
+			// Initialize the calendar
+			$('#calendar').evoCalendar({
+				theme: "Midnight blue",
+				calendarEvents: [{
+					id: 'event1', // Event's ID (required)
+					name: "New Year", // Event name (required)
+					date: "January/1/2025", // Event date (required)
+					description: "marks the first day of a year",
+					type: "holiday", // Event type (required)
+					everyYear: true // Same event every year (optional)
+				}]
+			});
+
+			$('#calendar').on('selectDate', function (event, activeDate) {
+				selectedDate = activeDate; // Update selectedDate when a new date is selected
+				console.log("Selected Date: ", selectedDate);
+			});
+
+			// $('#calendar').evoCalendar('addCalendarEvent', 
+			// [{
+			// 	id:"testid123",
+			// 	name: "Test Event",
+			// 	date: "January/3/2025",
+			// 	description: "This is a test event.",
+			// 	type: "event",
+			// 	everyYear: false
+			// }]);
+
+			function formatDateToEvoCalendar(dateString) {
+				const months = [
+					"January", "February", "March", "April", "May", "June",
+					"July", "August", "September", "October", "November", "December"
+				];
+				const [year, month, day] = dateString.split('-');
+				return `${months[parseInt(month) - 1]}/${parseInt(day)}/${year}`;
+			}
+
+			function formatTime(timeStr) {
+				const [hour, minute] = timeStr.split(":").map(Number);
+				const timeObj = new Date();
+				timeObj.setHours(hour, minute, 0);
+
+				return timeObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+			}
+
+			function getEvents() {
+				fetch('/get_events', {
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				})
+				.then(response => response.json())
+				.then(response => {
+					if (true ) {
+						const events = response.map(event => ({
+							id: event.id.toString(), // Ensure ID is a string
+							name: event.name,
+							date: formatDateToEvoCalendar(event.date), // Convert YYYY-MM-DD → Month/Day/Year
+							description: event.description || '', // Default to empty string if undefined
+							type: 'event', // Default type
+							color:event.color,
+							everyYear: event.everyYear === 1 // Convert 1/0 to boolean
+						}));
+						console.log("Formatted Events:", events); // Debugging
+						events.forEach(event => {
+							$('#calendar').evoCalendar('addCalendarEvent', [event]);
+						});
+
+
+					} else {
+						console.error("Invalid events format:", response);
+					}
+				})
+				.catch(error => {
+					console.error("Error fetching events:", error);
+				});
+			}
+
+			// Ensure that getEvents is called after the calendar is initialized
+			getEvents();
+
+			// Show popup modal
+			$('.add-event-btn').click(function () {
+				$('.popup-overlay').fadeIn();
+				$('.popup').fadeIn();
+			});
+
+			// Hide popup modal
+			$('.popup-overlay').click(function () {
+				$('.popup-overlay').fadeOut();
+				$('.popup').fadeOut();
+			});
+
+			// Hide popup modal when close button is clicked
+			$('.close-btn').click(function () {
+				$('.popup-overlay').fadeOut();
+				$('.popup').fadeOut();
+			});
+
+			// Add event to the calendar and send data to Flask
+			$('#add-event').click(function () {
+				const eventName = $('#event-name').val();
+				const startTime = $('#start-time').val();
+				const endTime = $('#end-time').val();
+				const description = $('#event-description').val();
+				const everyYear = $('input[name="everyYear"]:checked').val();
+				const color = $('#event-color').val(); // Assuming there's a field for event color
+
+				if (eventName && selectedDate && startTime && endTime) {
+					// Format the date for the database (YYYY-MM-DD)
+					const dateObj = new Date(selectedDate);
+					const eventDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+					console.log(eventDate);
+					console.log(selectedDate);
+
+					// Send data to Flask backend
+					const formattedDescription = `<strong>${formatTime(startTime)} - ${formatTime(endTime)}</strong><br>${description || ''}`;
+
+					const eventdata={
+							event_name: eventName,
+							event_date: eventDate,
+							start_time: startTime,
+							end_time: endTime,
+							description: formattedDescription,
+							everyYear: everyYear === "true", // Convert string to boolean
+							color: color || "#ffc107" // Default to yellow if no color is selected
+					}
+					console.log(eventdata);
+					$.ajax({
+						url: '/schedule_event',
+						method: 'POST',
+						contentType: 'application/json',
+						data: JSON.stringify(eventdata),
+						success: function(response) {
+							if (response.status === "success") {
+								console.log("")
+								alert("Event scheduled successfully!");
+								// Optionally, refresh the calendar or add the event to the UI
+								$('#calendar').evoCalendar('addCalendarEvent', {
+									id: Date.now().toString(),
+									name: eventName,
+									date: selectedDate,
+									time: [startTime, endTime],
+									description: formattedDescription,
+									type: "event",
+									color: color || "#ffc107", // Use the selected color or default
+									everyYear: everyYear === "true"
+								});
+							} else {
+								alert("Failed to schedule event: " + response.message);
+							}
+						},
+						error: function(xhr, status, error) {
+							alert("An error occurred while scheduling the event.");
+							console.error("Error:", error);
+						}
+					});
+
+					// Clear inputs and hide popup
+					$('#event-name').val('');
+					$('#start-time').val('');
+					$('#end-time').val('');
+					$('#event-description').val('');
+					$('#event-color').val(''); // Reset color field
+					$('input[name="everyYear"]').prop('checked', false);
+					$('.popup-overlay').fadeOut();
+					$('.popup').fadeOut();
+				} else {
+					alert("Please fill out all required fields.");
+				}
+			});
+
+			
+		});
+
+
+		
+
+
+	</script>
+
+	<canvas class="background"></canvas>
+	<script src="{{ url_for('static', filename='script2.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
+	
+
+	<!-- CONTENT -->
+	<section id="content">
+		<!-- NAVBAR -->
+		<nav>
+			<img src="static/logo3.png" alt="Logo" width="53">
+			<button class="nav-button" onclick="dashboardpage()">
+				<span class="nav-icon"><i class="material-icons">dashboard</i></span> Dashboard
+			</button>
+			<button class="nav-button" onclick="eventspage()">
+				<span class="nav-icon"><i class="material-icons">event</i></span> Events
+			</button>
+			<button class="nav-button" onclick="newspage()">
+				<span class="nav-icon"><i class="material-icons">article</i></span> News
+			</button>
+			<button class="nav-button" onclick="pdfpage()">
+				<span class="material-icons nav-icon">description</span> Summary
+			</button>
+			
+			<!-- Notification Bell -->
+			<div class="icon" onclick="toggleNotifi()">
+				<a class="notification">
+					<i class="bx bxs-bell"></i>
+					<span class="num" id="notifspan"></span>
+				</a>
+			</div>
+
+			 <!-- Notification Box -->
+			 <div class="notifi-box" id="box">
+				<h2>Notifications <span>17</span></h2>
+			</div>
+
+			<a href="{{ url_for('profile') }}" class="profile">
+				<i class="icon material-icons">person</i>
+			</a>
+		</nav>
+		<!-- NAVBAR -->
+
+
+	</section>
+	<!-- CONTENT -->
+	
+	<script>
+	function newspage(){
+		window.location.href='{{ url_for("news") }}'
+	}
+	function dashboardpage(){
+		window.location.href='{{ url_for("dashboard") }}'
+	}
+	function pdfpage(){
+		window.location.href='{{ url_for("summary") }}'
+	}
+	function eventspage(){
+		window.location.href='{{ url_for("events") }}'
+	}
+	// Toggle Notification Box
+	document.querySelector(".notification").addEventListener("click", function (event) {
+		console.log("notif clicked")
+		event.stopPropagation(); // Prevent click from propagating to document
+		var notifiBox = document.querySelector(".notifi-box");
+		notifiBox.classList.toggle("active");
+	});
+
+	// Hide Notification Box when clicking outside
+	document.addEventListener("click", function (event) {
+		var notifiBox = document.querySelector(".notifi-box");
+		var notificationIcon = document.querySelector(".notification");
+
+		// Check if the clicked element is not inside the notification box or the icon
+		if (!notifiBox.contains(event.target) && !notificationIcon.contains(event.target)) {
+			notifiBox.classList.remove("active");
+		}
+	});
+	document.addEventListener("DOMContentLoaded", function () {
+		fetchTodayEvents();
+	});
+
+	function fetchTodayEvents() {
+		
+		fetch(`/get_today_events`)
+			.then(response => response.json())
+			.then(data => {
+				const box = document.getElementById("box");
+				box.innerHTML = `<h2>Today's Events <span>${data.length}</span></h2>`; // Update count
+
+				const notifspan = document.getElementById("notifspan");
+			notifspan.innerText = data.length; 
+				
+				data.forEach(event => {
+					const item = document.createElement("div");
+					item.classList.add("notifi-item");
+
+					item.innerHTML = `
+						<img src="static/logo3.png" alt="img">
+						<div class="text" style="border-left: 5px solid ${event.color}; padding-left: 10px;">
+							<h4>${event.event_name}</h4>
+							<p>${event.timestamp} - ${event.description}</p>
+						</div>
+					`;
+					box.appendChild(item);
+				});
+			})
+			.catch(error => console.error("Error fetching today's events:", error));
+	}
+
+
+	</script>
+	
+
+</body>
+</html>

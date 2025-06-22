@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="static\newstyles.css" />
+    <title>Sahayak firstpage</title>
+  </head>
+  <body>
+    <nav>
+      <div class="nav__header">
+        <div class="nav__logo">
+            <img src="static\logo2.png" alt="Sahayak Logo" >
+            
+        </div>
+        
+        <div class="nav__menu__btn" id="menu-btn">
+          <span><i class="ri-menu-line"></i></span>
+        </div>
+      </div>
+      <ul class="nav__links" id="nav-links">
+        
+      </ul>
+      <div class="nav__btns">
+        <a href="{{ url_for('aboutus') }}" class="btn aboutus">About Us</a>
+        <button class="btn sign__up">Sign Up</button>
+        <button class="btn sign__in">Log In</button>
+      </div>
+    </nav>
+
+    <header class="header__container">
+      <div class="header__image">
+        <div class="header__image__card header__image__card-1">
+          <span><i class="ri-robot-line"></i></span>
+          ChatBot
+        </div>
+        <div class="header__image__card header__image__card-2">
+          <span><i class="ri-calendar-line"></i></span>
+          Schedule manager
+        </div>
+        <div class="header__image__card header__image__card-3">
+          <span><i class="ri-article-line"></i></span>
+          Pdf Reader
+        </div>
+        <div class="header__image__card header__image__card-4">
+          <span><i class="ri-book-line"></i></span>
+          Translator
+        </div>
+        <div class="header__image__card header__image__card-5">
+            <span><i class="ri-news-line"></i></span>
+            Personalized news
+          </div>
+        <img src="static\bkg4.png" alt="header" />
+      </div>
+      <div class="header__content">
+        <h1>YOUR <span>ULTIMATE </br>AI</span> SUPPORT </br> READY, SET, GO!</h1>
+        <p>
+            Experience seamless assistance with our AI Support! Designed to provide real-time solutions, our intelligent system understands your needs, answers your questions, and offers guidance 24/7. 
+        </p>
+        
+        <div class="bar">
+          Copyright © 2025 Sahayak. All rights reserved.
+        </div>
+      </div>
+    </header>
+
+    <!-- Login Model -->
+    <div id="login-modal" class="modal">
+      <div class="modal-content">
+        <span class="close" id="close-login">&times;</span>
+        <div class="modal-header">
+          <img src="static\logo3.png" alt="Sahayak Logo" class="modal-logo" />
+          <h2>Welcome to SAHAYAK</h2>
+        </div>
+        <form action="/login" method="post">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" placeholder="Enter your Username" required>
+
+          <label for="password-login">Password</label>
+          <div class="password-field">
+            <input
+              type="password"
+              id="password-login"
+              name="password"
+              placeholder="Enter your password"
+              required
+            />
+            <button type="button" class="toggle-password" data-target="password-login"><i class="ri-eye-off-line"></i></button>
+          </div>          
+
+          <a href="#" class="forgot-password" id="forgot-password-link">Forgot your password?</a>
+
+          <button type="submit" id="login-final-button" class="btn btn-primary">Log In</button>
+        </form>
+
+        <div class="separator">
+          <span>OR</span>
+        </div>
+
+        <button class="btn btn-google">
+          <i class="ri-google-fill"></i> Continue with Google
+        </button>
+
+        <div class="signup-link">
+          Not on SAHAYAK yet? <a href="#" id="signup-link">Sign up</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgot-password-modal" class="modal">
+      <div class="modal-content">
+        <button class="close-btn" id="close-forgot-password">&times;</button>
+        <div class="modal-logo">
+          <img src="static/logo3.png" alt="Logo" class="logo" />
+        </div>
+        <h2>Reset Your Password</h2>
+        <form>
+          <label for="reset-email">Enter your email</label>
+          <input type="email" id="reset-email" placeholder="Enter your email" required />
+          <p>
+            We will send you a link to reset your password.
+          </p>
+          <button type="submit" class="btn reset-btn">Send Reset Link</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signup-modal" class="modal">
+      <div class="modal-content">
+        <span class="close" id="close-signup">&times;</span>
+        <div class="modal-header">
+          <img src="static/logo3.png" alt="Sahayak Logo" class="modal-logo" />
+          <h2>Create Your Account</h2>
+        </div>
+        <form action="/register" method="Post">
+
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" placeholder="Enter your Username" required>
+          
+          <label for="email-signup">Email</label>
+          <input type="email" id="email-signup" name="email"  placeholder="Enter your email" required />
+
+          <label for="phone">Phone Number:</label>
+          <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" placeholder="1234567890" required>
+          <small>Enter a 10-digit phone number</small>
+
+          <label for="password-signup">Password</label>
+          <div class="password-field">
+            <input
+              type="password"
+              id="password-signup"
+              name="password"
+              placeholder="Create a password"
+              required
+            />
+            <button type="button" class="toggle-password" data-target="password-signup"><i class="ri-eye-off-line"></i></button>
+          </div>
+
+          <label for="birthdate">Birthdate</label>
+          <input
+            type="date"
+            id="birthdate"
+            placeholder="dd-mm-yyyy"
+            name="dob"
+            required
+          />
+
+          <label for="gender">Gender</label>
+          <select id="gender" required name="gender">
+            <option value="" disabled selected>Select</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+
+          <label for="work-domain">Domain of Work</label>
+          <select id="work-domain" required>
+            <option value="" disabled selected>Select</option>
+            <option value="technology">Technology</option>
+            <option value="education">Education</option>
+            <option value="healthcare">Healthcare</option>
+            <option value="finance">Finance</option>
+            <option value="other">Other</option>
+          </select>
+
+          <p class="terms">
+            By signing up, you agree to our <a href="#">Terms of Service</a> and acknowledge our <a href="#">Privacy Policy</a>.
+          </p>
+
+          <button type="submit" class="btn btn-primary">Sign Up</button>
+        </form>
+
+        <div class="login-link">
+          Already a member? <a href="#" id="login-link">Log In</a>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/scrollreveal"></script>
+    <script src="static\main.js"></script>
+  </body>
+</html>
