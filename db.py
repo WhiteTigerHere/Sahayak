@@ -1,11 +1,10 @@
 import mysql.connector
-from datetime import datetime
 
 # Database connection details
 DB_CONFIG = {
     "host": "localhost",      # Change if using a remote server
     "user": "root",           # Change to your MySQL username
-    "password": "itaCHI#1",# Change to your MySQL password
+    "password": "",# Change to your MySQL password
     "database": "UserDB"
 }
 
@@ -88,48 +87,7 @@ def insert_chat(chat_id, user_id, message, sender):
             conn.close()
 import mysql.connector
 
-def fetch_chat_history_rts(user_id, chat_id, n):
-    """Fetches last 'n' chat messages for a specific user and chat_id, alternating between user and bot."""
-    conn = connect_db()
-    if conn:
-        cursor = conn.cursor()
-        query = """
-            SELECT message, sender, timestamp 
-            FROM chats 
-            WHERE user_id = %s AND chat_id = %s
-            ORDER BY timestamp 
-            LIMIT %s
-        """
-        try:
-            cursor.execute(query, (user_id, chat_id, n*2))  # Get n messages from both user and bot (total 2*n)
-            chats = cursor.fetchall()
 
-            # Reverse the order to have the earliest messages first
-
-            # Format the result into the desired structure for Cohere (single list)
-            print(len(chats))
-            formatted_chats = []
-            for i in range(0, len(chats), 2):
-                user_message = chats[i] if chats[i][1] == 'user' else None
-                bot_message = chats[i+1] if i+1 < len(chats) and chats[i+1][1] == 'bot' else None
-                
-                # Only add valid messages (i.e., user and bot messages)
-                if user_message and bot_message:
-                    formatted_chats.append(
-                        {"role": "user", "content": user_message[0]}  # user_message
-                    )
-                    formatted_chats.append(
-                        {"role": "assistant", "content": bot_message[0]}  # bot_response
-                    )
-            #print(formatted_chats)
-            return formatted_chats
-
-        except mysql.connector.Error as err:
-            print(f"Error: {err}")
-            return {"error": "Database error occurred."}
-        finally:
-            cursor.close()
-            conn.close()
 
 def schedule_event(user_id, event_name, timestamp, duration, color="#ffc107", description=None, every_year=False):
     """Schedules an event for a specific user."""
@@ -218,46 +176,7 @@ def list_user_events(user_id, start_time, end_time):
             cursor.close()
             conn.close()
             
-def get_user_events(user_id):
-    """Fetches all events for a specific user, including details like color, description, and everyYear."""
-    conn = connect_db()
-    events_data = []  # List to store the events
 
-    if conn:
-        cursor = conn.cursor()
-        query = """
-            SELECT event_id, event_name, timestamp, duration, color, description, everyYear
-            FROM events
-            WHERE user_id = %s
-            ORDER BY timestamp ASC
-        """
-        try:
-            cursor.execute(query, (user_id,))
-            events = cursor.fetchall()
-
-            # Check if events exist and format them as needed
-            if events:
-                for event in events:
-                    event_details = {
-                        "event_id": event[0],
-                        "event_name": event[1],
-                        "timestamp": event[2].strftime('%Y-%m-%d %H:%M:%S'),  # Formatting timestamp
-                        "duration": event[3],  # Duration in minutes
-                        "color": event[4],
-                        "description": event[5] if event[5] else "",  # Default to empty string if None
-                        "everyYear": event[6]
-                    }
-                    events_data.append(event_details)
-            else:
-                print(f"No events found for user {user_id}.")
-
-        except mysql.connector.Error as err:
-            print(f"Error: {err}")
-        finally:
-            cursor.close()
-            conn.close()
-
-    return events_data
 
 
 def get_user_events_today(user_id):
@@ -416,42 +335,7 @@ def get_chats_by_chat_id_and_user_id(chat_id, user_id):
         # Return chat messages or an empty list if no messages found
         return results if results else []
 
-    except mysql.connector.Error as e:
-        print(f"Error: {e}")
-        return []
 
-
-def check_user_password(username, password):
-    """
-    Verifies if the provided password matches the stored password hash for the given username.
-    """
-    try:
-        # Connect to the database
-        conn = connect_db()
-        cursor = conn.cursor()
-
-        # Query to fetch the stored password hash
-        query = "SELECT password_hash FROM users WHERE username = %s"
-        cursor.execute(query, (username,))
-        result = cursor.fetchone()  # Fetch the first matching record
-
-        # Close the connection
-        cursor.close()
-        conn.close()
-
-        # If no user found, return False
-        if not result:
-            return False
-        
-        # Get the stored password hash
-        stored_password_hash = result[0]
-
-        # Check if the provided password matches the stored hash
-        return stored_password_hash==password
-
-    except mysql.connector.Error as e:
-        print(f"Error: {e}")
-        return False
 
 
 # Example usage
@@ -464,15 +348,8 @@ if __name__ == "__main__":
     # schedule_event(user_id, event_name, timestamp, duration)
 
     # # Deleting an event
-    # event_id_to_delete = 1  # Replace with the event ID to be deleted
-    # delete_event_by_id(event_id_to_delete)
 
-    # Listing events for a user within a specific time period
-    # start_time = "2025-01-01 00:00:00"  # Start of the time period
-    # end_time = "2025-12-31 23:59:59"    # End of the time period
-    # list_user_events(user_id, start_time, end_time)
 
     create_user("JohnDoe", "john@example.com", "1234567890", "hashed_password","2004-01-01","Male")
     # insert_chat(1, "Hello, bot!", "user")
-    # insert_chat(1, "Hello, John! How can I assist you?", "bot")
-    # print(fetch_chat_history_rts(1,2))
+   
