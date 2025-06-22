@@ -1,17 +1,5 @@
-from gtts import gTTS
+
 import os
-from cohere_chat import init_client, fetch_response
-import requests
-from bs4 import BeautifulSoup
-
-# Initialize Cohere client
-co = init_client()
-
-def speak(text, language="en"):
-    """Convert text to speech and play it."""
-    tts = gTTS(text=text, lang=language)
-    tts.save("output.mp3")
-    os.system("start output.mp3")
 
 def news_scrape():
     """Scrapes news from India Today and returns a list of news articles with title, link, and image."""
