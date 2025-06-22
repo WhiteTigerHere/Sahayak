@@ -1,7 +1,8 @@
 # SAHAYAK - The Ultimate AI Assistant for Bureaucrats
 
-![Landing Screenshot](images/landing.png)
-![Chat Screenshot](images/chat.png)
+## Website Previews
+![Landing Screenshot](landing.png)
+![Chat Screenshot](chat.png)
 
 ## Problem Statement
 
