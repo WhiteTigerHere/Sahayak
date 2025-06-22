@@ -68,78 +68,7 @@
       </div>
     </header>
 
-    <!-- Login Model -->
-    <div id="login-modal" class="modal">
-      <div class="modal-content">
-        <span class="close" id="close-login">&times;</span>
-        <div class="modal-header">
-          <img src="static\logo3.png" alt="Sahayak Logo" class="modal-logo" />
-          <h2>Welcome to SAHAYAK</h2>
-        </div>
-        <form action="/login" method="post">
-          <label for="username">Username</label>
-          <input type="text" id="username" name="username" placeholder="Enter your Username" required>
-
-          <label for="password-login">Password</label>
-          <div class="password-field">
-            <input
-              type="password"
-              id="password-login"
-              name="password"
-              placeholder="Enter your password"
-              required
-            />
-            <button type="button" class="toggle-password" data-target="password-login"><i class="ri-eye-off-line"></i></button>
-          </div>          
-
-          <a href="#" class="forgot-password" id="forgot-password-link">Forgot your password?</a>
-
-          <button type="submit" id="login-final-button" class="btn btn-primary">Log In</button>
-        </form>
-
-        <div class="separator">
-          <span>OR</span>
-        </div>
-
-        <button class="btn btn-google">
-          <i class="ri-google-fill"></i> Continue with Google
-        </button>
-
-        <div class="signup-link">
-          Not on SAHAYAK yet? <a href="#" id="signup-link">Sign up</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Forgot Password Modal -->
-    <div id="forgot-password-modal" class="modal">
-      <div class="modal-content">
-        <button class="close-btn" id="close-forgot-password">&times;</button>
-        <div class="modal-logo">
-          <img src="static/logo3.png" alt="Logo" class="logo" />
-        </div>
-        <h2>Reset Your Password</h2>
-        <form>
-          <label for="reset-email">Enter your email</label>
-          <input type="email" id="reset-email" placeholder="Enter your email" required />
-          <p>
-            We will send you a link to reset your password.
-          </p>
-          <button type="submit" class="btn reset-btn">Send Reset Link</button>
-        </form>
-      </div>
-    </div>
-
-    <!-- Signup Modal -->
-    <div id="signup-modal" class="modal">
-      <div class="modal-content">
-        <span class="close" id="close-signup">&times;</span>
-        <div class="modal-header">
-          <img src="static/logo3.png" alt="Sahayak Logo" class="modal-logo" />
-          <h2>Create Your Account</h2>
-        </div>
-        <form action="/register" method="Post">
-
+  
           <label for="username">Username</label>
           <input type="text" id="username" name="username" placeholder="Enter your Username" required>
           
