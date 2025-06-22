@@ -2,23 +2,14 @@ from flask import Flask, render_template,redirect,url_for,request,jsonify,sessio
 from chatbot import chat
 from news import *
 from db import *
-import subprocess
-
-from pdf_reader import *
-import speech_recognition as sr
-from datetime import datetime, timedelta
-
 
 app = Flask(__name__)
-
-app.secret_key = '11223344'
 
 @app.route('/')
 def home():
     session["user_id"]=None
     session["chat_id"]=1
-    return render_template('newfirstpage.html')
-
+    return render_template('firstpage.html')
 
 
 @app.route('/process_audio', methods=['POST'])
@@ -165,56 +156,6 @@ def get_user_info():
         return jsonify(user_data)
     return jsonify({"error": "User not found"}), 404
 
-@app.route('/update-user-info', methods=['POST'])
-def update_user_info():
-    """API endpoint to update user details."""
-    user_id=session["user_id"]
-    data = request.json
-    username = data.get("username")
-    email = data.get("email")
-    phone_number = data.get("phone_number")
-    dob = data.get("date_of_birth")
-    gender = data.get("gender")
-
-    conn = connect_db()
-    if conn:
-        cursor = conn.cursor()
-        query = """
-        UPDATE users 
-        SET username = %s, email = %s, phone_number = %s, date_of_birth = %s, gender = %s
-        WHERE id = %s
-        """
-        try:
-            cursor.execute(query, (username, email, phone_number, dob, gender, user_id))
-            conn.commit()
-            return jsonify({"message": "Profile updated successfully"})
-        except mysql.connector.Error as err:
-            print(f"Error: {err}")
-            return jsonify({"error": "Database update failed"}), 500
-        finally:
-            cursor.close()
-            conn.close()
-    return jsonify({"error": "Database connection failed"}), 500
-
-@app.route("/get_chats", methods=["POST"])
-def get_chats():
-    """
-    Fetches all chat messages for the current chat ID from the session.
-    """
-    chat_id = session["chat_id"] # Retrieve chat_id from the session
-    user_id= session["user_id"]
-
-    if not chat_id:
-        return jsonify({"error": "No chat_id found in session"}), 400
-
-    chats = get_chats_by_chat_id_and_user_id(chat_id,user_id)  # Fetch chat messages
-
-    # print("\n\nchat ka length lele\n\n")
-    # print(session.get("chat_id"))
-    # print(len(chats))
-
-    return jsonify({"chats": chats})
-
 @app.route("/new_chat", methods=["POST"])
 def new_chat():
     """
@@ -331,45 +272,6 @@ def handle_schedule_event():
         print(f"Unexpected error: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
-@app.route('/get_events', methods=['GET'])
-def get_events():
-    if 'user_id' not in session:
-        return jsonify({"status": "error", "message": "User not logged in"}), 401
-    
-    user_id = session['user_id']
-    
-    try:
-        # Fetch events for the logged-in user from the database
-        events = get_user_events(user_id)
-        
-        # Format the events for the calendar
-        formatted_events = []
-        for event in events:
-            formatted_events.append({
-                'id': event['event_id'],  # Event's ID
-                'name': event['event_name'],  # Event's name
-                'date': event['timestamp'].split(' ')[0],  # Extract date part (YYYY-MM-DD)
-                'time': [event['timestamp'].split(' ')[1],  # Extract time part (HH:MM:SS)
-                         (datetime.strptime(event['timestamp'], "%Y-%m-%d %H:%M:%S") + timedelta(minutes=event['duration'])).strftime('%H:%M:%S')],  # Add duration to start time
-                'description': event['description'],  # Event's description
-                'color': event['color'],  # Event color
-                'everyYear': event['everyYear']  # Whether event repeats every year
-            })
-        print(formatted_events)
-        return jsonify(formatted_events)
-    
-    except Exception as e:
-        print (e)
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-
-# Search route (if you're processing search input)
-@app.route('/search', methods=['GET'])
-def search():
-    query = request.args.get('q')  # Get the search query from the form.
-    # Add logic to process the search query and return results.
-    return render_template('search_results.html', query=query)
-
 @app.route("/summarize", methods=["POST"])
 def summarize_pdf():
     # Read the PDF file from the request body
@@ -443,7 +345,3 @@ async def fetchnews():
 
     #print(newslist)
 
-    return jsonify({'newslist': newslist})
-
-if __name__ == '__main__':
-    app.run(debug=True)
